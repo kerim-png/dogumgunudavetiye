@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>🎉 Doğum Günü Daveti!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink: #FF6EB4;
+      --hot-pink: #FF1493;
+      --purple: #9B59B6;
+      --lavender: #C77DFF;
+      --gold: #FFD700;
+      --white: #FFFFFF;
+    }
+
+    html, body {
+      min-height: 100%;
+      font-family: 'Baloo 2', cursive;
+      background: linear-gradient(150deg, #FF9BD2 0%, #D4B3FF 50%, #A8EDEA 100%);
+      overflow-x: hidden;
+    }
+
+    /* ── Confetti Canvas ── */
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Stars ── */
+    .star {
+      position: fixed;
+      font-size: 1.2rem;
+      pointer-events: none;
+      z-index: 1;
+      animation: twinkle 2s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
+      to   { opacity: 1;   transform: scale(1.2) rotate(20deg); }
+    }
+
+    /* ── Floating Emojis ── */
+    .float-emoji {
+      position: fixed;
+      pointer-events: none;
+      z-index: 2;
+      animation: floatEmoji 5s ease-in-out infinite;
+    }
+    @keyframes floatEmoji {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50%       { transform: translateY(-18px) rotate(5deg); }
+    }
+
+    /* ── Balloons ── */
+    .balloon-container {
+      position: fixed;
+      bottom: -160px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .balloon {
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      position: relative;
+      animation: floatUp linear infinite;
+      opacity: 0.85;
+    }
+    .balloon::after {
+      content: '';
+      position: absolute;
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 28px;
+      background: rgba(0,0,0,0.25);
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) rotate(-3deg); opacity: 0.85; }
+      100% { transform: translateY(-110vh) rotate(3deg); opacity: 0; }
+    }
+
+    /* ── Card Wrapper ── */
+    .card-wrapper {
+      position: relative;
+      z-index: 10;
+      max-width: 450px;
+      margin: 0 auto;
+      padding: 16px 10px 40px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(16px);
+      border-radius: 30px;
+      box-shadow:
+        0 24px 80px rgba(155,89,182,0.35),
+        0 0 0 3px rgba(255,110,180,0.4);
+      overflow: hidden;
+    }
+
+    /* ── Hero ── */
+    .card-hero {
+      background: linear-gradient(160deg, #FF6EB4 0%, #C77DFF 60%, #74B9FF 100%);
+      padding: 32px 24px 56px;           /* big bottom padding so badge/photo won't overlap title */
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-hero::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+    }
+    .card-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -70px; left: -30px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .emoji-burst {
+      font-size: 3.8rem;
+      display: block;
+      animation: popIn 0.8s cubic-bezier(0.175,0.885,0.32,1.275) both;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+    }
+    @keyframes popIn {
+      0%   { transform: scale(0) rotate(-10deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+    }
+
+    .invite-label {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.9);
+      margin-top: 14px;
+      display: block;
+    }
+
+    .main-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+      margin-top: 8px;
+      text-shadow: 0 3px 14px rgba(0,0,0,0.2);
+      animation: slideDown 0.7s 0.3s ease both;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+
+    /* ── Photo + Badge Block ── */
+    .photo-badge-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: -54px;   /* overlap into hero */
+      position: relative;
+      z-index: 5;
+      padding-bottom: 4px;
+    }
+
+    .photo-frame {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      padding: 4px;
+      background: linear-gradient(135deg, var(--gold), var(--hot-pink), var(--lavender));
+      box-shadow: 0 8px 32px rgba(155,89,182,0.45);
+      animation: rotateBorder 6s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes rotateBorder {
+      from { filter: hue-rotate(0deg); }
+      to   { filter: hue-rotate(360deg); }
+    }
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center top;
+      border: 3px solid white;
+      display: block;
+    }
+
+    /* Age badge NOW sits below the photo – clean and visible */
+    .age-badge {
+      display: inline-block;
+      background: var(--gold);
+      color: #7A3C00;
+      font-size: 1rem;
+      font-weight: 800;
+      padding: 6px 22px;
+      border-radius: 50px;
+      margin-top: 12px;
+      box-shadow: 0 4px 20px rgba(255,215,0,0.55);
+      animation: bounce 1s 0.8s ease both;
+    }
+    @keyframes bounce {
+      0%   { transform: scale(0); opacity: 0; }
+      70%  { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ── Body ── */
+    .card-body {
+      padding: 10px 20px 24px;
+    }
+
+    /* ── Parents Note – HIGH PRIORITY block ── */
+    .parents-cta-block {
+      margin: 14px 0 16px;
+    }
+
+    .parents-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 15px 20px;
+      background: linear-gradient(135deg, #FF1493, #C77DFF);
+      color: white;
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 28px rgba(199,125,255,0.55);
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+      overflow: hidden;
+      animation: attentionShake 3s 2s ease-in-out infinite;
+    }
+    @keyframes attentionShake {
+      0%, 90%, 100% { transform: translateX(0); }
+      92%  { transform: translateX(-4px); }
+      94%  { transform: translateX(4px); }
+      96%  { transform: translateX(-4px); }
+      98%  { transform: translateX(4px); }
+    }
+    .parents-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(199,125,255,0.65); }
+    .parents-btn:active { transform: scale(0.97); }
+
+    .btn-pulse {
+      display: inline-block;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.3); }
+    }
+
+    .tap-hint {
+      text-align: center;
+      font-size: 0.78rem;
+      color: #c0392b;
+      font-weight: 700;
+      margin-top: 7px;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 0.5; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── Divider ── */
+    .divider {
+      text-align: center;
+      margin: 14px 0;
+      font-size: 1.15rem;
+      letter-spacing: 6px;
+    }
+
+    /* ── Personal Note ── */
+    .personal-note {
+      background: linear-gradient(135deg, #FFF0F8, #F3E6FF);
+      border-left: 4px solid var(--pink);
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      font-size: 0.95rem;
+      color: #5A2D75;
+      line-height: 1.65;
+      font-weight: 600;
+      position: relative;
+    }
+    .personal-note::before {
+      content: '💬';
+      position: absolute;
+      top: -13px;
+      left: 14px;
+      font-size: 1.4rem;
+    }
+
+    /* ── Details ── */
+    .details-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, rgba(255,110,180,0.07), rgba(199,125,255,0.07));
+      border: 1.5px solid rgba(199,125,255,0.22);
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+
+    .detail-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .detail-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--purple);
+      display: block;
+    }
+    .detail-value {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #2D1B4E;
+      display: block;
+      line-height: 1.35;
+      margin-top: 2px;
+    }
+
+    /* ── Footer ── */
+    .card-footer {
+      text-align: center;
+      padding: 14px 20px 22px;
+      border-top: 2px dashed rgba(199,125,255,0.25);
+      margin-top: 14px;
+    }
+    .footer-emoji { font-size: 1.6rem; letter-spacing: 4px; }
+    .footer-text {
+      font-size: 0.8rem;
+      color: #9B59B6;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(60,20,100,0.62);
+      backdrop-filter: blur(7px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal {
+      background: white;
+      border-radius: 28px;
+      padding: 30px 24px 26px;
+      max-width: 370px;
+      width: 100%;
+      transform: scale(0.8) translateY(30px);
+      transition: transform 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
+      box-shadow: 0 20px 80px rgba(155,89,182,0.45);
+    }
+    .modal-overlay.active .modal { transform: scale(1) translateY(0); }
+
+    .modal-icon { font-size: 3rem; text-align: center; display: block; margin-bottom: 10px; }
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--purple);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .modal-content {
+      background: linear-gradient(135deg, #FFF0F8, #F3E6FF);
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 0.92rem;
+      line-height: 1.7;
+      color: #4A2370;
+      font-weight: 600;
+      border-left: 4px solid var(--lavender);
+    }
+    .modal-close {
+      display: block;
+      width: 100%;
+      margin-top: 18px;
+      padding: 13px;
+      background: linear-gradient(135deg, #FF1493, #C77DFF);
+      color: white;
+      font-family: 'Baloo 2', cursive;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(199,125,255,0.4);
+      transition: transform 0.15s;
+    }
+    .modal-close:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- Fixed Stars -->
+<span class="star" style="top:7%;left:4%;animation-delay:0s;font-size:1rem;">⭐</span>
+<span class="star" style="top:14%;right:5%;animation-delay:0.5s;font-size:1.1rem;">✨</span>
+<span class="star" style="top:55%;left:2%;animation-delay:1s;font-size:0.9rem;">💫</span>
+<span class="star" style="top:70%;right:3%;animation-delay:0.3s;font-size:1rem;">⭐</span>
+<span class="star" style="top:85%;left:5%;animation-delay:0.8s;font-size:0.9rem;">💫</span>
+
+<!-- Floating Emojis -->
+<span class="float-emoji" style="top:72%;right:4%;font-size:1.5rem;animation-delay:0s;">🎈</span>
+<span class="float-emoji" style="top:28%;right:2%;font-size:1.3rem;animation-delay:1.2s;">🦋</span>
+<span class="float-emoji" style="top:58%;left:2%;font-size:1.3rem;animation-delay:2s;">🌸</span>
+
+<!-- Card -->
+<div class="card-wrapper">
+  <div class="card">
+
+    <!-- Hero -->
+    <div class="card-hero">
+      <span class="emoji-burst">🎂</span>
+      <span class="invite-label">Sizi de Aramızda Görmek İstiyoruz!</span>
+      <h1 class="main-title">Doğum<br>Günü Partisi!</h1>
+    </div>
+
+    <!-- Photo + Badge (badge is BELOW photo, no overlap) -->
+    <div class="photo-badge-block">
+      <div class="photo-frame">
+        <img src="photo.jpg" alt="Doğum Günü Prensesi"
+             onerror="this.style.display='none';this.parentElement.innerHTML+='<div style=\'width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,#FF6EB4,#C77DFF);display:flex;align-items:center;justify-content:center;font-size:3rem;\'>🎂</div>'" />
+      </div>
+      <span class="age-badge">🎉 6. Yaşım 🎉</span>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body">
+
+      <!-- ⬆ Parents Note – First thing after photo, very prominent -->
+      <div class="parents-cta-block">
+        <button class="parents-btn" id="parents-btn" onclick="openModal()">
+          <span class="btn-pulse">📋</span>
+          <span>Ebeveynler İçin Not</span>
+          <span class="btn-pulse">⚠️</span>
+        </button>
+        <p class="tap-hint">👆 Lütfen okumayı unutmayın!</p>
+      </div>
+
+      <div class="divider">🎈 🎁 🎊 🎈</div>
+
+      <!-- Personal note -->
+      <div class="personal-note">
+        Ayköfte'nin keyifli eğlencesi eşliğinde, bu özel günümde sizleri de aramızda görmekten mutluluk duyarım! 🥳
+      </div>
+
+      <!-- Details -->
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="detail-icon">📅</span>
+          <div>
+            <span class="detail-label">Tarih</span>
+            <span class="detail-value">25 Nisan 2025, Cumartesi</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon">⏰</span>
+          <div>
+            <span class="detail-label">Saat</span>
+            <span class="detail-value">11:00 – 14:00</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon">📍</span>
+          <div>
+            <span class="detail-label">Mekan</span>
+            <span class="detail-value">Cafe Deren A'mor<br>
+              <span style="font-size:0.8rem;font-weight:600;color:#7A3C9E;">
+                Binsesin Sit., Mutlukent, 1964. Sk.<br>No:22, 06800 Çankaya / Ankara
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="card-footer">
+      <div class="footer-emoji">🌟💜🌟</div>
+      <p class="footer-text">Seni görmekten çok mutlu olacağım! 🎀</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <span class="modal-icon">👨‍👩‍👧</span>
+    <div class="modal-title">Ebeveynler İçin Not</div>
+    <div class="modal-content">
+      Organizasyonun daha rahat ve keyifli ilerleyebilmesi adına davete
+      <strong>tek ebeveyn eşliğinde</strong> katılım rica olunur.<br><br>
+      Anlayışınız ve desteğiniz için çok teşekkür ederiz 🙏💜
+    </div>
+    <button class="modal-close" onclick="closeModal()">✔️ Anladım, Teşekkürler!</button>
+  </div>
+</div>
+
+<script>
+  /* ── Modal ── */
+  function openModal() {
+    document.getElementById('modal-overlay').classList.add('active');
+  }
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('active');
+  }
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  /* ── Confetti ── */
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const COLORS = ['#FF6EB4','#FF1493','#C77DFF','#9B59B6','#FFD700','#74B9FF','#A8EDEA','#FF7675','#FFC8A2'];
+  const pieces = [];
+
+  class Piece {
+    constructor() { this.reset(true); }
+    reset(init) {
+      this.x = Math.random() * canvas.width;
+      this.y = init ? Math.random() * canvas.height : -20;
+      this.size = Math.random() * 8 + 5;
+      this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.speed = Math.random() * 1.4 + 0.7;
+      this.angle = Math.random() * 360;
+      this.spin  = (Math.random() - 0.5) * 4;
+      this.wobble = Math.random() * 3;
+      this.wobbleSpeed = Math.random() * 0.05 + 0.02;
+      this.wobbleAngle = Math.random() * Math.PI * 2;
+      this.shape = Math.random() > 0.5 ? 'rect' : 'circle';
+    }
+    update() {
+      this.y += this.speed;
+      this.angle += this.spin;
+      this.wobbleAngle += this.wobbleSpeed;
+      this.x += Math.sin(this.wobbleAngle) * this.wobble;
+      if (this.y > canvas.height + 20) this.reset(false);
+    }
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle * Math.PI / 180);
+      ctx.fillStyle = this.color;
+      ctx.globalAlpha = 0.82;
+      if (this.shape === 'rect') {
+        ctx.fillRect(-this.size/2, -this.size/4, this.size, this.size/2);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size/2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  for (let i = 0; i < 65; i++) pieces.push(new Piece());
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  /* ── Balloons ── */
+  const balloonColors = ['#FF6EB4','#FF1493','#C77DFF','#FFD700','#74B9FF','#FF7675'];
+  for (let i = 0; i < 6; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'balloon-container';
+    wrap.style.left = (5 + i * 16) + '%';
+    const balloon = document.createElement('div');
+    balloon.className = 'balloon';
+    balloon.style.background = balloonColors[i % balloonColors.length];
+    const size = 48 + Math.random() * 18;
+    balloon.style.width = size + 'px';
+    balloon.style.height = (size * 1.25) + 'px';
+    balloon.style.animationDuration = (12 + Math.random() * 8) + 's';
+    balloon.style.animationDelay = (i * 2.5) + 's';
+    wrap.appendChild(balloon);
+    document.body.appendChild(wrap);
+  }
+
+  /* ── Tap Sparkle ── */
+  const sparkStyle = document.createElement('style');
+  sparkStyle.textContent = `@keyframes sparkFly {
+    0%   { transform: scale(0) translateY(0); opacity:1; }
+    100% { transform: scale(1.5) translateY(-50px); opacity:0; }
+  }`;
+  document.head.appendChild(sparkStyle);
+
+  document.querySelector('.card').addEventListener('click', function(e) {
+    const sparks = ['✨','🌟','💫','⭐','🎉','🎊','💖'];
+    const el = document.createElement('span');
+    el.textContent = sparks[Math.floor(Math.random() * sparks.length)];
+    el.style.cssText = `position:fixed;left:${e.clientX-12}px;top:${e.clientY-12}px;
+      font-size:1.6rem;pointer-events:none;z-index:999;
+      animation:sparkFly 0.75s ease forwards;`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 750);
+  });
+</script>
+</body>
+</html>
