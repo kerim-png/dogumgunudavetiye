@@ -571,18 +571,8 @@
   /* ── Maps ── */
   function openMaps(e) {
     e.preventDefault();
-    const address = encodeURIComponent('Cafe Deren Amor, Binsesin Sit, Mutlukent, 1964 Sk No:22, 06800 Çankaya Ankara');
-    const lat = 39.8756;
-    const lng = 32.7706;
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isMac = /Macintosh/.test(navigator.userAgent) && !('ontouchstart' in window);
-    if (isIOS || isMac) {
-      // Apple Maps
-      window.open(`maps://maps.apple.com/?q=${address}&ll=${lat},${lng}`, '_blank');
-    } else {
-      // Google Maps
-      window.open(`https://maps.google.com/?q=${address}`, '_blank');
-    }
+    const googleMapsUrl = 'https://maps.app.goo.gl/eVwmuunENKj666gT6';
+    window.open(googleMapsUrl, '_blank');
   }
 
   /* ── Modal ── */
